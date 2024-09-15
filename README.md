@@ -1,11 +1,12 @@
 # math-quiz-cli
 
-A math quiz CLI that poses math questions to the user with a time limit. 
+A math quiz CLI that poses math questions to the user with a time limit.
 
 ## Usage
 
 ```bash
-math -csv="problems.csv" -limit=30
+math -num=10 -limit=30
 ```
-- `problems.csv` is the list of questions and answers to ask the user; should be written in `question,answer` format
+
+- num is the number of questions that will be asked (defaut 10 questions)
 - limit is the time limit in seconds (default 30s)

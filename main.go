@@ -1,38 +1,32 @@
 package main
 
 import (
-	"encoding/csv"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
-	"strings"
+	"strconv"
 	"time"
 )
 
 func main() {
-	csvFilename := flag.String("csv", "problems.csv", "a csv file in the format of 'question,answer;")
+	numQuestions := flag.Int("num", 10, "the number of questions that will be asked")
 	timeLimit := flag.Int("limit", 30, "the time limit for the quiz in seconds")
 	flag.Parse()
 
-	file, err := os.Open(*csvFilename)
-	if err != nil {
-		exit(fmt.Sprintf("Failed to open the CSV file: %s\n", *csvFilename))
+	if *numQuestions <= 0 {
+		fmt.Println("Please enter a number greater than 0")
+		os.Exit(1)
 	}
 
-	r := csv.NewReader(file)
-	lines, err := r.ReadAll()
-	if err != nil {
-		exit("Failed to parse the provided CSV file")
-	}
-
-	problems := parseLines(lines)
+	problems := getMathQuestions(*numQuestions)
 
 	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
 
 	correct := 0
 askingProblems:
 	for i, p := range problems {
-		fmt.Printf("Problem #%d: %s = ", i+1, p.q)
+		fmt.Printf("Problem #%d: %v = ", i+1, p.q)
 
 		// go routine
 		answerCh := make(chan string)
@@ -50,32 +44,41 @@ askingProblems:
 			if answer == p.a {
 				correct++
 			}
-
 		}
 	}
-	fmt.Printf("\nYou scored %d out of %d\n", correct, len(problems))
 
+	fmt.Printf("\nYou scored %d out of %d\n", correct, len(problems))
 }
 
-func parseLines(lines [][]string) []problem {
-	ret := make([]problem, len(lines))
+func getMathQuestions(numQuestions int) []problem {
+	questionAnswer := make([]problem, numQuestions)
+	for i := 0; i < numQuestions; i++ {
+		firstNum, secondNum := rand.Intn(9)+1, rand.Intn(9)+1
 
-	for i, line := range lines {
-		ret[i] = problem{
-			q: line[0],
-			a: strings.TrimSpace(line[1]),
+		operator := rand.Intn(2) // if 0, use addition; if 1, use subtraction
+
+		var question string
+		var answer int
+
+		switch operator {
+		case 0:
+			question = fmt.Sprintf("%d + %d", firstNum, secondNum)
+			answer = firstNum + secondNum
+		case 1:
+			question = fmt.Sprintf("%d - %d", firstNum, secondNum)
+			answer = firstNum - secondNum
+		}
+
+		questionAnswer[i] = problem{
+			q: question,
+			a: strconv.Itoa(answer),
 		}
 	}
 
-	return ret
+	return questionAnswer
 }
 
 type problem struct {
 	q string
 	a string
-}
-
-func exit(msg string) {
-	fmt.Println(msg)
-	os.Exit(1)
 }
