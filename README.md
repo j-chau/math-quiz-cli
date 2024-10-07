@@ -1,6 +1,6 @@
 # math-quiz-cli
 
-A math quiz CLI that poses math questions to the user with a time limit.
+A math quiz CLI that asks random addition and subtraction questions to be answered within a time limit.
 
 ## Usage
 
